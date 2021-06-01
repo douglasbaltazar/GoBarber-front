@@ -9,9 +9,21 @@ import Input from '../../components/input'
 import Button from '../../components/button'
 import getValidationErrors from '../../utils/getValidationErrors'
 import logoImg from '../../assets/logo.svg'
+import { Link, useHistory } from 'react-router-dom';
+import api from '../../services/api';
+import { useToast } from '../../context/ToastContext';
+
+interface SignUpFormData {
+    name: string;
+    email: string;
+    password: string;
+}
 
 const SignUp: React.FC = () => {
-    const handleSubmit = useCallback(async (data: object) => {
+    const formRef = useRef<FormHandles>(null)
+    const { addToast } = useToast();
+    const history = useHistory();
+    const handleSubmit = useCallback(async (data: SignUpFormData) => {
         formRef.current?.setErrors({});
         console.log(data);
         try {
@@ -23,13 +35,32 @@ const SignUp: React.FC = () => {
             await schema.validate(data, {
                 abortEarly: false,
             });
-        } catch(err) {
-            const errors = getValidationErrors(err);
-            formRef.current?.setErrors(errors)
+
+            await api.post('/users', data);
+
+            addToast({
+                type: 'success',
+                title: 'Cadastro realizado',
+                description: `${data.email} // ${data.name}`,
+            })
+
+            history.push('/')
+
+
+        } catch (err) {
+            if(err instanceof Yup.ValidationError) {
+                const errors = getValidationErrors(err);
+                formRef.current?.setErrors(errors)
+            }
+            addToast({
+                type: 'error',
+                description: 'Ocorreu um erro ao fazer cadastro, cheque as credenciais.',
+                title: 'Erro no cadastro',
+            });
         }
 
-    }, []);
-    const formRef = useRef<FormHandles>(null)
+    }, [addToast, history]);
+    
     return (
         <Container>
             <Background />
@@ -42,10 +73,10 @@ const SignUp: React.FC = () => {
                     <Input icon={FiLock} name="password" type="password" placeholder="Senha" />
                     <Button type="submit">Cadastrar</Button>
                 </Form>
-                <a href="registrar">
-                    <FiArrowLeft />
+            <Link to="/">
+                <FiArrowLeft />
                 Voltar para Login
-            </a>
+            </Link>
             </Content>
         </Container>
 

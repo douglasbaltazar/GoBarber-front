@@ -12,7 +12,8 @@ import getValidationErrors from '../../utils/getValidationErrors';
 import { FormHandles } from '@unform/core';
 import { useToast } from '../../context/ToastContext'
 import { useAuth } from '../../context/AuthContext';
-import { title } from 'process';
+
+import { Link } from 'react-router-dom';
 
 interface SignInFormData {
     email: string;
@@ -65,10 +66,10 @@ const SignIn: React.FC = () => {
                 <Button type="submit">Entrar</Button>
                 <a href="forgot">Esqueci minha senha</a>
             </Form>
-            <a href="registrar">
+            <Link to="/signup">
                 <FiLogIn />
                 Criar conta
-            </a>
+            </Link>
         </Content>
         <Background />
     </Container>
